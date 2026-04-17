@@ -142,46 +142,44 @@
 
         <section id="contacto" class="contact-section container">
             <div class="contact-card glass-card">
-                <div class="contact-info">
-                    <div class="consultation-badge">100% Sin Compromiso</div>
-                    <h2>¿Hablamos hoy mismo?</h2>
-                    <p>Escríbeme y analicemos tus servicios. Mis clientes ahorran de media entre un 15% y un 30% anual.</p>
-                    <div class="contact-details">
-                        <div class="detail-item">
-                            <span class="dot"></span>
-                            <p><strong>Email:</strong> viboasesor@gmail.com</p>
-                        </div>
-                        <div class="detail-item">
-                            <span class="dot"></span>
-                            <p><strong>Ubicación:</strong> Servicio nacional (Toda España)</p>
-                        </div>
-                    </div>
+                <div class="contact-header">
+                    <div class="consultation-badge">✨ 100% Sin Compromiso</div>
+                    <h2>¿Hablamos hoy?</h2>
+                    <p>Optimicemos tus facturas juntos. Mis clientes ahorran de media entre un 15% y un 30% anual.</p>
                 </div>
+                
                 <form id="contactForm" class="contact-form">
-                    <div class="form-group">
-                        <label for="name">Tu Nombre</label>
-                        <input type="text" id="name" name="name" placeholder="Ej: Juan Pérez" required>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Tu Nombre</label>
+                            <input type="text" id="name" name="name" placeholder="Ej: Juan Pérez" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Tu Email</label>
+                            <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="service">¿Qué quieres optimizar?</label>
+                            <select id="service" name="service">
+                                <option value="luz">Luz y Energía</option>
+                                <option value="telefonia">Telefonía / Internet</option>
+                                <option value="seguros">Seguros</option>
+                                <option value="aislamiento">Aislamiento Térmico</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Mensaje breve (opcional)</label>
+                            <textarea id="message" name="message" rows="1" placeholder="Cuéntame un poco más..."></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="email">Tu Email</label>
-                        <input type="email" id="email" name="email" placeholder="ejemplo@correo.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="service">¿Qué quieres optimizar?</label>
-                        <select id="service" name="service">
-                            <option value="luz">Luz y Energía</option>
-                            <option value="telefonia">Telefonía / Internet</option>
-                            <option value="seguros">Seguros</option>
-                            <option value="aislamiento">Aislamiento Térmico</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Mensaje breve (opcional)</label>
-                        <textarea id="message" name="message" rows="3" placeholder="Cuéntame un poco más..."></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary" style="width: 100%;">Contactar por WhatsApp</button>
+                    <button type="submit" class="btn-primary">Contactar por WhatsApp</button>
                     <p class="form-status" id="formStatus"></p>
                 </form>
+
+                <div class="contact-footer">
+                    <p><span>📧</span> viboasesor@gmail.com</p>
+                    <p><span>📍</span> Servicio Nacional (España)</p>
+                </div>
             </div>
         </section>
     </main>
