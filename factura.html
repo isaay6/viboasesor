@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Facturas | VIBOASESOR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for the invoice app */
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .controls-panel {
+            width: 400px;
+            background: var(--white);
+            padding: 2rem;
+            overflow-y: auto;
+            border-right: 1px solid #E2E8F0;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+
+        .controls-panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            background: #F8FAFC;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+        }
+        
+        .form-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .preview-panel {
+            flex: 1;
+            background-color: #cbd5e1;
+            padding: 3rem;
+            overflow-y: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Invoice Paper Style */
+        .invoice-paper {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 20mm;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .invoice-logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            color: var(--primary);
+        }
+        
+        .invoice-logo span { color: var(--accent); }
+        
+        .company-details {
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        
+        .company-details strong {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .invoice-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+        }
+
+        .client-info {
+            width: 45%;
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .client-info h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .client-info p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin: 0.2rem 0;
+        }
+
+        .invoice-details {
+            width: 45%;
+            text-align: right;
+        }
+        
+        .invoice-details h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: var(--text-main);
+            min-width: 120px;
+            text-align: left;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        .invoice-table th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .invoice-table th:last-child {
+            text-align: right;
+        }
+
+        .invoice-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #E2E8F0;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .invoice-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .invoice-summary {
+            width: 55%;
+            margin-left: auto;
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+        }
+
+        .summary-row.total {
+            border-top: 2px solid var(--primary);
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .invoice-footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #E2E8F0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .add-row-btn {
+            background: none;
+            border: 2px dashed var(--accent);
+            color: var(--accent);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s;
+        }
+
+        .add-row-btn:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .print-btn {
+            width: 100%;
+            margin-top: 2rem;
+            font-size: 1rem;
+        }
+
+        /* Form Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .concept-row {
+            background: white;
+            padding: 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .remove-row {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .controls-panel {
+                display: none;
+            }
+            .preview-panel {
+                padding: 0;
+                background: white;
+            }
+            .invoice-paper {
+                box-shadow: none;
+                width: 100%;
+                padding: 0;
+            }
+            .app-container {
+                height: auto;
+                overflow: visible;
+                display: block;
+            }
+            /* Hide print button if somehow visible */
+            .print-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Controls Panel -->
+        <div class="controls-panel">
+            <h2>Crear Factura</h2>
+            
+            <div class="form-section">
+                <h3>1. Datos de Factura</h3>
+                <div class="form-group">
+                    <label>Nº Factura</label>
+                    <input type="text" id="inv-num" value="F-2026/001" oninput="updateInvoice()">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="inv-date" oninput="updateInvoice()">
+                    </div>
+                    <div class="form-group">
+                        <label>Forma de Pago</label>
+                        <input type="text" id="inv-payment" value="CONTADO" oninput="updateInvoice()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>2. Datos del Cliente</h3>
+                <div class="form-group">
+                    <label>Nombre / Razón Social</label>
+                    <input type="text" id="cli-name" value="Nombre del Cliente" oninput="updateInvoice()">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>NIF/CIF</label>
+                        <input type="text" id="cli-nif" value="B12345678" oninput="updateInvoice()">
+                    </div>
+                    <div class="form-group">
+                        <label>Nº Cliente (Opc.)</label>
+                        <input type="text" id="cli-num" oninput="updateInvoice()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" id="cli-address" value="Calle Ejemplo, 1" oninput="updateInvoice()">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>C.P.</label>
+                        <input type="text" id="cli-cp" value="32001" oninput="updateInvoice()">
+                    </div>
+                    <div class="form-group">
+                        <label>Población</label>
+                        <input type="text" id="cli-city" value="Ourense" oninput="updateInvoice()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Provincia</label>
+                    <input type="text" id="cli-prov" value="Ourense" oninput="updateInvoice()">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>3. Conceptos</h3>
+                <div id="concepts-container">
+                    <!-- Concept rows will be added here -->
+                </div>
+                <button class="add-row-btn" onclick="addConceptRow()">+ Añadir Concepto</button>
+            </div>
+
+            <div class="form-section">
+                <h3>4. Impuestos</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>I.V.A. (%)</label>
+                        <input type="number" id="tax-iva" value="21" oninput="updateInvoice()">
+                    </div>
+                    <div class="form-group">
+                        <label>Ret. IRPF (%)</label>
+                        <input type="number" id="tax-irpf" value="7" oninput="updateInvoice()">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary print-btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="invoice-paper" id="invoice">
+                <div class="invoice-header">
+                    <div class="invoice-logo">VIBO<span>ASESOR</span></div>
+                    <div class="company-details">
+                        <strong>Sonia Fidalgo García</strong><br>
+                        CIF: 71509178Q<br>
+                        Aldea Pexeiros nº 41 (Viana do Bolo), 32563<br>
+                        Teléfono: 619 884 501<br>
+                        viboasesor@gmail.com
+                    </div>
+                </div>
+
+                <div class="invoice-meta">
+                    <div class="client-info">
+                        <h4>DATOS DEL CLIENTE</h4>
+                        <p><strong id="out-cli-name">Nombre del Cliente</strong></p>
+                        <p>NIF/CIF: <span id="out-cli-nif">B12345678</span></p>
+                        <p id="out-cli-address">Calle Ejemplo, 1</p>
+                        <p><span id="out-cli-cp">32001</span> - <span id="out-cli-city">Ourense</span> (<span id="out-cli-prov">Ourense</span>)</p>
+                    </div>
+                    <div class="invoice-details">
+                        <h2>FACTURA</h2>
+                        <div class="info-row">
+                            <span class="info-label">Nº Factura:</span>
+                            <span class="info-value" id="out-inv-num">F-2026/001</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Fecha:</span>
+                            <span class="info-value" id="out-inv-date"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Nº Cliente:</span>
+                            <span class="info-value" id="out-cli-num">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Forma de Pago:</span>
+                            <span class="info-value" id="out-inv-payment">CONTADO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="invoice-table">
+                    <thead>
+                        <tr>
+                            <th>Referencia</th>
+                            <th>Concepto</th>
+                            <th>Cant.</th>
+                            <th>Precio</th>
+                            <th>Dto. %</th>
+                            <th>Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody id="out-concepts">
+                        <!-- Rows -->
+                    </tbody>
+                </table>
+
+                <div class="invoice-summary">
+                    <div class="summary-row">
+                        <span>Suma Neto:</span>
+                        <span id="out-subtotal">0.00 €</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Descuento Total:</span>
+                        <span id="out-discount">0.00 €</span>
+                    </div>
+                    <div class="summary-row">
+                        <strong style="color:var(--primary)">Base Imponible:</strong>
+                        <strong style="color:var(--primary)" id="out-base">0.00 €</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span>I.V.A. (<span id="out-iva-perc">21</span>%):</span>
+                        <span id="out-iva-val">0.00 €</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Ret. IRPF (<span id="out-irpf-perc">7</span>%):</span>
+                        <span id="out-irpf-val">0.00 €</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>TOTAL:</span>
+                        <span id="out-total">0.00 €</span>
+                    </div>
+                </div>
+
+                <div class="invoice-footer">
+                    En vista del cumplimiento de la normativa europea 2016/679 sobre Protección de Datos (RGPD) le informamos que el tratamiento de los datos proporcionados por Ud. será responsabilidad de Sonia Fidalgo García con el objetivo de la gestión de facturación, y que además se compromete a no ceder o comunicar la información a terceros. Puede ejercer sus derechos de acceso, rectificación, cancelación o supresión del tratamiento a través del correo electrónico: viboasesor@gmail.com
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let concepts = [
+            { ref: '', name: 'Comisiones de venta', qty: 1, price: 1200, dto: 0 }
+        ];
+
+        function init() {
+            document.getElementById('inv-date').valueAsDate = new Date();
+            renderConceptsForm();
+            updateInvoice();
+        }
+
+        function renderConceptsForm() {
+            const container = document.getElementById('concepts-container');
+            container.innerHTML = '';
+            
+            concepts.forEach((c, i) => {
+                const div = document.createElement('div');
+                div.className = 'concept-row';
+                div.innerHTML = `
+                    <button class="remove-row" onclick="removeConcept(${i})" title="Eliminar">✕</button>
+                    <div class="form-group" style="margin-bottom:0.5rem">
+                        <label>Concepto</label>
+                        <input type="text" placeholder="Ej: Comisiones..." value="${c.name}" oninput="updateConcept(${i}, 'name', this.value)">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Ref.</label>
+                            <input type="text" placeholder="Referencia" value="${c.ref}" oninput="updateConcept(${i}, 'ref', this.value)">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Cantidad</label>
+                            <input type="number" step="0.01" value="${c.qty}" oninput="updateConcept(${i}, 'qty', this.value)">
+                        </div>
+                    </div>
+                    <div class="grid-2" style="margin-top:0.5rem">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Precio (€)</label>
+                            <input type="number" step="0.01" value="${c.price}" oninput="updateConcept(${i}, 'price', this.value)">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label>Dto. (%)</label>
+                            <input type="number" step="0.01" value="${c.dto}" oninput="updateConcept(${i}, 'dto', this.value)">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addConceptRow() {
+            concepts.push({ ref: '', name: '', qty: 1, price: 0, dto: 0 });
+            renderConceptsForm();
+            updateInvoice();
+        }
+
+        function removeConcept(index) {
+            concepts.splice(index, 1);
+            renderConceptsForm();
+            updateInvoice();
+        }
+
+        function updateConcept(index, field, value) {
+            concepts[index][field] = field === 'name' || field === 'ref' ? value : parseFloat(value) || 0;
+            updateInvoice();
+        }
+
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('es-ES');
+        }
+
+        function updateInvoice() {
+            // Update Text Fields
+            document.getElementById('out-inv-num').innerText = document.getElementById('inv-num').value;
+            document.getElementById('out-inv-date').innerText = formatDate(document.getElementById('inv-date').value);
+            
+            const clientNum = document.getElementById('cli-num').value;
+            document.getElementById('out-cli-num').innerText = clientNum ? clientNum : '-';
+            
+            document.getElementById('out-inv-payment').innerText = document.getElementById('inv-payment').value;
+            
+            document.getElementById('out-cli-name').innerText = document.getElementById('cli-name').value || '-';
+            document.getElementById('out-cli-nif').innerText = document.getElementById('cli-nif').value || '-';
+            document.getElementById('out-cli-address').innerText = document.getElementById('cli-address').value || '-';
+            document.getElementById('out-cli-cp').innerText = document.getElementById('cli-cp').value || '-';
+            document.getElementById('out-cli-city').innerText = document.getElementById('cli-city').value || '-';
+            document.getElementById('out-cli-prov').innerText = document.getElementById('cli-prov').value || '-';
+
+            // Taxes
+            const ivaPerc = parseFloat(document.getElementById('tax-iva').value) || 0;
+            const irpfPerc = parseFloat(document.getElementById('tax-irpf').value) || 0;
+            document.getElementById('out-iva-perc').innerText = ivaPerc;
+            document.getElementById('out-irpf-perc').innerText = irpfPerc;
+
+            // Concepts & Math
+            let subtotal = 0;
+            let totalDiscount = 0;
+            
+            const tbody = document.getElementById('out-concepts');
+            tbody.innerHTML = '';
+
+            concepts.forEach(c => {
+                const rowBase = c.qty * c.price;
+                const rowDto = rowBase * (c.dto / 100);
+                const rowTotal = rowBase - rowDto;
+                
+                subtotal += rowBase;
+                totalDiscount += rowDto;
+
+                tbody.innerHTML += \`
+                    <tr>
+                        <td>\${c.ref}</td>
+                        <td>\${c.name}</td>
+                        <td>\${c.qty}</td>
+                        <td>\${formatCurrency(c.price)}</td>
+                        <td>\${c.dto}%</td>
+                        <td>\${formatCurrency(rowTotal)}</td>
+                    </tr>
+                \`;
+            });
+
+            const baseImponible = subtotal - totalDiscount;
+            const ivaVal = baseImponible * (ivaPerc / 100);
+            const irpfVal = baseImponible * (irpfPerc / 100);
+            const total = baseImponible + ivaVal - irpfVal;
+
+            document.getElementById('out-subtotal').innerText = formatCurrency(subtotal);
+            document.getElementById('out-discount').innerText = formatCurrency(totalDiscount);
+            document.getElementById('out-base').innerText = formatCurrency(baseImponible);
+            document.getElementById('out-iva-val').innerText = formatCurrency(ivaVal);
+            document.getElementById('out-irpf-val').innerText = formatCurrency(irpfVal);
+            document.getElementById('out-total').innerText = formatCurrency(total);
+        }
+
+        // Initialize
+        window.onload = init;
+    </script>
+</body>
+</html>
