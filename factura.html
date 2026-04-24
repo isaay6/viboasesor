@@ -603,16 +603,16 @@
                 subtotal += rowBase;
                 totalDiscount += rowDto;
 
-                tbody.innerHTML += \`
+                tbody.innerHTML += `
                     <tr>
-                        <td>\${c.ref}</td>
-                        <td>\${c.name}</td>
-                        <td>\${c.qty}</td>
-                        <td>\${formatCurrency(c.price)}</td>
-                        <td>\${c.dto}%</td>
-                        <td>\${formatCurrency(rowTotal)}</td>
+                        <td>${c.ref}</td>
+                        <td>${c.name}</td>
+                        <td>${c.qty}</td>
+                        <td>${formatCurrency(c.price)}</td>
+                        <td>${c.dto}%</td>
+                        <td>${formatCurrency(rowTotal)}</td>
                     </tr>
-                \`;
+                `;
             });
 
             const baseImponible = subtotal - totalDiscount;
