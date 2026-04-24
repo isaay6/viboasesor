@@ -284,6 +284,60 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
+        @media screen and (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+                height: auto;
+                overflow: visible;
+            }
+            .controls-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid #E2E8F0;
+                padding: 1.5rem;
+            }
+            .preview-panel {
+                padding: 1rem;
+            }
+            .invoice-paper {
+                width: 100%;
+                min-height: auto;
+                padding: 1.5rem;
+            }
+            .invoice-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 1.5rem;
+            }
+            .company-details {
+                text-align: center;
+            }
+            .invoice-meta {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            .client-info, .invoice-details {
+                width: 100%;
+                text-align: left;
+            }
+            .info-row {
+                justify-content: space-between;
+            }
+            .invoice-summary {
+                width: 100%;
+                margin-top: 2rem;
+            }
+            /* Make table scrollable on small screens */
+            .invoice-table-wrapper {
+                width: 100%;
+                overflow-x: auto;
+            }
+            .invoice-table {
+                min-width: 600px; /* Forces scroll if screen is too small */
+            }
+        }
+
         @media print {
             body {
                 background: white;
@@ -439,21 +493,23 @@
                     </div>
                 </div>
 
-                <table class="invoice-table">
-                    <thead>
-                        <tr>
-                            <th>Referencia</th>
-                            <th>Concepto</th>
-                            <th>Cant.</th>
-                            <th>Precio</th>
-                            <th>Dto. %</th>
-                            <th>Importe</th>
-                        </tr>
-                    </thead>
-                    <tbody id="out-concepts">
-                        <!-- Rows -->
-                    </tbody>
-                </table>
+                <div class="invoice-table-wrapper">
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Referencia</th>
+                                <th>Concepto</th>
+                                <th>Cant.</th>
+                                <th>Precio</th>
+                                <th>Dto. %</th>
+                                <th>Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody id="out-concepts">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="invoice-summary">
                     <div class="summary-row">
