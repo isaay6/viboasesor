@@ -447,6 +447,14 @@
                 </div>
             </div>
 
+            <div class="form-section">
+                <h3>5. Salida</h3>
+                <div class="form-group">
+                    <label>Nombre del Archivo (PDF)</label>
+                    <input type="text" id="output-filename" placeholder="Ej: Factura_Juan_Perez" oninput="updateDocumentTitle()">
+                </div>
+            </div>
+
             <button class="btn-primary print-btn" onclick="window.print()">Imprimir / Guardar PDF</button>
         </div>
 
@@ -457,10 +465,12 @@
                     <div class="invoice-logo">VIBO<span>ASESOR</span></div>
                     <div class="company-details">
                         <strong>Sonia Fidalgo García</strong><br>
-                        CIF: 71509178Q<br>
-                        Aldea Pexeiros nº 41 (Viana do Bolo), 32563<br>
-                        Teléfono: 619 884 501<br>
-                        viboasesor@gmail.com
+                        NIF 71509178Q<br>
+                        Pixeiros, 41<br>
+                        32563 VIANA DO BOLO ( Ourense)<br>
+                        Teléfono: 619884501<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;665372721<br>
+                        Mail: viboasesor@gmail.com
                     </div>
                 </div>
 
@@ -682,6 +692,15 @@
             document.getElementById('out-iva-val').innerText = formatCurrency(ivaVal);
             document.getElementById('out-irpf-val').innerText = formatCurrency(irpfVal);
             document.getElementById('out-total').innerText = formatCurrency(total);
+        }
+
+        function updateDocumentTitle() {
+            const filename = document.getElementById('output-filename').value;
+            if (filename) {
+                document.title = filename;
+            } else {
+                document.title = "Generador de Facturas | VIBOASESOR";
+            }
         }
 
         // Initialize
