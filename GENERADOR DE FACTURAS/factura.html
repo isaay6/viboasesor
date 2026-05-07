@@ -9,6 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
     <style>
+        /* Global box-sizing */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         /* Specific styles for the invoice app */
         body {
             background-color: var(--bg-light);
@@ -66,6 +71,7 @@
         /* Invoice Paper Style */
         .invoice-paper {
             width: 210mm;
+            max-width: 100%;
             min-height: 290mm; /* Slightly less than A4 to be safe */
             background: white;
             padding: 15mm;
@@ -74,6 +80,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            margin: 0 auto;
         }
 
         .invoice-header {
@@ -159,7 +166,7 @@
 
         .info-value {
             color: var(--text-main);
-            min-width: 120px;
+            min-width: 100px;
             text-align: left;
         }
 
@@ -343,39 +350,49 @@
         @media print {
             @page {
                 size: A4;
-                margin: 10mm;
+                margin: 0; /* Use 0 margins to control exactly with CSS */
             }
             body {
                 background: white;
                 margin: 0;
                 padding: 0;
+                width: 210mm; /* Force A4 width */
             }
             .controls-panel {
                 display: none;
             }
             .preview-panel {
                 padding: 0;
+                margin: 0;
                 background: white;
                 display: block;
                 overflow: visible;
+                width: 100%;
             }
             .invoice-paper {
                 box-shadow: none;
-                width: 100% !important;
-                height: auto !important;
-                min-height: 0 !important;
-                padding: 0 !important;
+                width: 210mm !important;
+                max-width: 210mm !important;
+                height: 297mm !important;
+                min-height: 297mm !important;
+                padding: 15mm !important; /* Re-introduce padding but ensure it fits */
                 margin: 0 !important;
                 border-radius: 0;
+                border: none;
             }
             .app-container {
                 height: auto;
                 overflow: visible;
                 display: block;
             }
+            .invoice-table {
+                width: 100% !important;
+                table-layout: auto;
+            }
             .invoice-footer {
-                margin-top: 2rem; /* Reasonable gap in print */
+                margin-top: auto; 
                 position: relative;
+                padding-bottom: 0;
             }
             /* Hide print button if somehow visible */
             .print-btn { display: none; }
