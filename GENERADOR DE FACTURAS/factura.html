@@ -66,20 +66,22 @@
         /* Invoice Paper Style */
         .invoice-paper {
             width: 210mm;
-            min-height: 297mm;
+            min-height: 290mm; /* Slightly less than A4 to be safe */
             background: white;
-            padding: 20mm;
+            padding: 15mm;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             border-radius: 4px;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .invoice-header {
             display: flex;
             justify-content: space-between;
             border-bottom: 3px solid var(--accent);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .invoice-logo {
@@ -106,7 +108,7 @@
         .invoice-meta {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .client-info {
@@ -164,7 +166,7 @@
         .invoice-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .invoice-table th {
@@ -218,13 +220,13 @@
         }
 
         .invoice-footer {
-            margin-top: 4rem;
-            padding-top: 2rem;
+            margin-top: auto; /* Push to bottom but allow it to move up if space is tight */
+            padding-top: 1rem;
             border-top: 1px solid #E2E8F0;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
             text-align: justify;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .add-row-btn {
@@ -339,8 +341,14 @@
         }
 
         @media print {
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
             body {
                 background: white;
+                margin: 0;
+                padding: 0;
             }
             .controls-panel {
                 display: none;
@@ -348,16 +356,26 @@
             .preview-panel {
                 padding: 0;
                 background: white;
+                display: block;
+                overflow: visible;
             }
             .invoice-paper {
                 box-shadow: none;
-                width: 100%;
-                padding: 0;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border-radius: 0;
             }
             .app-container {
                 height: auto;
                 overflow: visible;
                 display: block;
+            }
+            .invoice-footer {
+                margin-top: 2rem; /* Reasonable gap in print */
+                position: relative;
             }
             /* Hide print button if somehow visible */
             .print-btn { display: none; }
