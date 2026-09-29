@@ -379,6 +379,29 @@
             text-align: right;
         }
 
+        /* Concepto takes all spare width; the other columns shrink to their content */
+        .invoice-table th:nth-child(2),
+        .invoice-table td:nth-child(2) {
+            width: 100%;
+        }
+
+        .invoice-table th:not(:nth-child(2)),
+        .invoice-table td:not(:nth-child(2)) {
+            white-space: nowrap;
+        }
+
+        .invoice-table th,
+        .invoice-table td {
+            padding-left: 0.6rem;
+            padding-right: 0.6rem;
+        }
+
+        .invoice-table th:first-child,
+        .invoice-table td:first-child { padding-left: 1rem; }
+
+        .invoice-table th:last-child,
+        .invoice-table td:last-child { padding-right: 1rem; }
+
         .invoice-table td {
             padding: 1rem;
             border-bottom: 1px solid #E2E8F0;
@@ -876,7 +899,7 @@
                     <table class="invoice-table">
                         <thead>
                             <tr>
-                                <th>Referencia</th>
+                                <th>Ref.</th>
                                 <th>Concepto</th>
                                 <th>Cant.</th>
                                 <th>Precio</th>
