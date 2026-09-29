@@ -1538,8 +1538,9 @@
             const file = new File([blob], filename, { type: 'application/pdf' });
             const text = shareMessage();
 
-            // Mobile (and Safari on Mac): native share sheet with the PDF attached
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            // Phones/tablets: native share sheet with the PDF attached. Not on computers,
+            // where the macOS/Windows share menu doesn't list WhatsApp.
+            if (isMobileDevice() && navigator.canShare && navigator.canShare({ files: [file] })) {
                 const share = () => navigator.share({ files: [file], text });
                 try {
                     await share();
@@ -1559,19 +1560,31 @@
                 return;
             }
 
-            // Desktop fallback: download the PDF and open WhatsApp with the message ready
+            // Computers: download the PDF and open the WhatsApp app with the message ready
             downloadBlob(blob, filename);
             const body = document.createElement('div');
             body.append(
-                Object.assign(document.createElement('p'), { textContent: `Se ha descargado «${filename}».` }),
-                Object.assign(document.createElement('p'), { textContent: 'Al abrir WhatsApp, elige el contacto y adjunta el archivo con el clip 📎. El mensaje ya va escrito.' })
+                Object.assign(document.createElement('p'), { textContent: `Se ha descargado «${filename}» en tu carpeta de Descargas.` }),
+                Object.assign(document.createElement('p'), { textContent: 'Al abrir WhatsApp, elige el contacto (el mensaje ya va escrito) y adjunta el PDF con el clip 📎 o arrastrándolo al chat.' })
             );
             const open = await showDialog({
                 title: 'Enviar por WhatsApp',
                 body,
-                buttons: [{ label: 'Cerrar' }, { label: 'Abrir WhatsApp', value: true, primary: true }]
+                buttons: [
+                    { label: 'Cerrar' },
+                    { label: 'Usar WhatsApp Web', value: 'web' },
+                    { label: 'Abrir WhatsApp', value: 'app', primary: true }
+                ]
             });
-            if (open) window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+            const encoded = encodeURIComponent(text);
+            if (open === 'app') window.location.href = `whatsapp://send?text=${encoded}`;
+            if (open === 'web') window.open(`https://web.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener');
+        }
+
+        function isMobileDevice() {
+            if (navigator.userAgentData && navigator.userAgentData.mobile) return true;
+            return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS reports as Mac
         }
 
         // ---------- Dialog & toast ----------
