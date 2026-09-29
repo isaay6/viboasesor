@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
     <style>
         /* Global box-sizing */
         *, *::before, *::after {
@@ -20,7 +21,7 @@
             display: flex;
             min-height: 100vh;
         }
-        
+
         .app-container {
             display: flex;
             width: 100%;
@@ -28,36 +29,203 @@
             overflow: hidden;
         }
 
+        /* Controls Panel: header + scrollable body + fixed footer */
         .controls-panel {
-            width: 400px;
+            width: 420px;
+            flex-shrink: 0;
+            height: 100vh;
             background: var(--white);
-            padding: 2rem;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
             border-right: 1px solid #E2E8F0;
             box-shadow: 5px 0 15px rgba(0,0,0,0.02);
             z-index: 10;
         }
 
-        .controls-panel h2 {
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .controls-header h2 {
             font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin: 0;
             color: var(--primary);
         }
 
+        .controls-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 2rem;
+        }
+
+        .controls-footer {
+            padding: 1rem 2rem 1.25rem;
+            border-top: 1px solid #E2E8F0;
+            background: var(--white);
+            box-shadow: 0 -6px 16px rgba(0,0,0,0.04);
+        }
+
+        .footer-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .footer-total span {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .footer-total strong {
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+
+        .footer-breakdown {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1rem;
+            border: none;
+            border-radius: 100px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--white);
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .action-btn:hover { transform: translateY(-2px); }
+        .action-btn:disabled { opacity: 0.6; cursor: progress; transform: none; }
+        .action-btn.print { background: var(--accent); }
+        .action-btn.print:hover { background: var(--accent-hover); }
+        .action-btn.whatsapp { background: #25D366; }
+        .action-btn.whatsapp:hover { background: #1EBE5B; }
+        .action-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
         .form-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             background: #F8FAFC;
-            padding: 1.5rem;
+            padding: 1.25rem;
             border-radius: 12px;
             border: 1px solid #E2E8F0;
         }
-        
+
         .form-section h3 {
             font-size: 1.1rem;
             margin-bottom: 1rem;
             color: var(--primary);
         }
 
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1rem;
+        }
+
+        .section-head h3 { margin-bottom: 0; }
+
+        .controls-panel .form-group { margin-bottom: 1rem; }
+        .controls-panel .form-group label { margin-bottom: 0.35rem; font-size: 0.9rem; }
+        .controls-panel .form-group input,
+        .controls-panel .form-group select {
+            padding: 0.7rem 0.8rem;
+            background: var(--white);
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .link-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-hover);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .small-btn {
+            padding: 0.45rem 0.9rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 100px;
+            background: var(--white);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .small-btn:hover { border-color: var(--accent); }
+        .small-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--white); }
+        .small-btn.primary:hover { background: var(--accent-hover); }
+        .small-btn.danger:hover { background: #FEE2E2; border-color: #FCA5A5; color: #DC2626; }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.45rem;
+        }
+
+        .chip {
+            padding: 0.2rem 0.65rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 100px;
+            background: var(--white);
+            font-family: inherit;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .chip.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+
+        .draft-banner {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .draft-banner p {
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .draft-actions { display: flex; gap: 0.5rem; }
+
+        /* Invoice Paper Style */
         .preview-panel {
             flex: 1;
             background-color: #cbd5e1;
@@ -68,7 +236,6 @@
             align-items: flex-start;
         }
 
-        /* Invoice Paper Style */
         .invoice-paper {
             width: 210mm;
             max-width: 100%;
@@ -82,6 +249,28 @@
             flex-direction: column;
             margin: 0 auto;
         }
+
+        /* Fixed A4 layout used when generating the PDF for WhatsApp */
+        .invoice-paper.pdf-export {
+            width: 210mm;
+            max-width: none;
+            min-height: 0;
+            height: 296mm;
+            padding: 15mm;
+            margin: 0;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        /* Undo the small-screen layout so a PDF made from a phone looks like the desktop one */
+        .pdf-export .invoice-header { flex-direction: row; align-items: stretch; text-align: left; gap: 0; }
+        .pdf-export .company-details { text-align: right; }
+        .pdf-export .invoice-meta { flex-direction: row; gap: 0; }
+        .pdf-export .client-info { width: 45%; }
+        .pdf-export .invoice-details { width: 45%; text-align: right; }
+        .pdf-export .info-row { justify-content: flex-end; }
+        .pdf-export .invoice-summary { width: 55%; margin-top: 0; }
+        .pdf-export .invoice-table { min-width: 0; }
 
         .invoice-header {
             display: flex;
@@ -97,16 +286,16 @@
             letter-spacing: -1.5px;
             color: var(--primary);
         }
-        
+
         .invoice-logo span { color: var(--accent); }
-        
+
         .company-details {
             text-align: right;
             font-size: 0.9rem;
             color: var(--text-muted);
             line-height: 1.4;
         }
-        
+
         .company-details strong {
             color: var(--primary);
             font-size: 1rem;
@@ -142,7 +331,7 @@
             width: 45%;
             text-align: right;
         }
-        
+
         .invoice-details h2 {
             font-size: 2rem;
             color: var(--primary);
@@ -244,19 +433,13 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
+            font-family: inherit;
             font-weight: 600;
-            margin-top: 1rem;
             transition: all 0.3s;
         }
 
         .add-row-btn:hover {
             background: rgba(16, 185, 129, 0.1);
-        }
-
-        .print-btn {
-            width: 100%;
-            margin-top: 2rem;
-            font-size: 1rem;
         }
 
         /* Form Grid */
@@ -272,26 +455,112 @@
             border: 1px solid #E2E8F0;
             border-radius: 8px;
             margin-bottom: 1rem;
-            position: relative;
         }
 
-        .remove-row {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
+        .concept-head {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .concept-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .concept-actions { display: flex; gap: 0.35rem; }
+
+        .icon-btn {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
         }
+
+        .icon-btn:hover { border-color: var(--accent); color: var(--accent-hover); }
+        .icon-btn.danger:hover { background: #FEE2E2; border-color: #FCA5A5; color: #DC2626; }
+
+        .concept-row .form-group { margin-bottom: 0.5rem; }
+        .concept-row .grid-2 .form-group { margin-bottom: 0; }
+        .concept-row .grid-2 + .grid-2 { margin-top: 0.5rem; }
+
+        /* Dialog */
+        #app-dialog {
+            border: none;
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: min(440px, calc(100vw - 32px));
+            margin: auto;
+            color: var(--text-main);
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+        }
+
+        #app-dialog::backdrop { background: rgba(15, 23, 42, 0.45); }
+
+        .dlg-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .dlg-body { font-size: 0.95rem; line-height: 1.5; }
+        .dlg-body p + p { margin-top: 0.5rem; }
+        .dlg-body ul { padding-left: 1.2rem; }
+        .dlg-body li { margin: 0.3rem 0; }
+
+        .dlg-actions {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.25rem;
+        }
+
+        .client-list { list-style: none; padding: 0 !important; max-height: 50vh; overflow-y: auto; }
+
+        .client-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .client-list small { display: block; color: var(--text-muted); }
+        .client-list .row-btns { display: flex; gap: 0.35rem; }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translate(-50%, 20px);
+            max-width: calc(100vw - 32px);
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.7rem 1.2rem;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s, transform 0.25s;
+            z-index: 100;
+        }
+
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
         @media screen and (max-width: 1024px) {
             .app-container {
@@ -301,10 +570,19 @@
             }
             .controls-panel {
                 width: 100%;
+                height: auto;
                 border-right: none;
                 border-bottom: 2px solid #E2E8F0;
-                padding: 1.5rem;
             }
+            .controls-header { padding: 1rem 1.25rem; }
+            .controls-body { overflow: visible; padding: 1.25rem; }
+            .controls-footer {
+                position: sticky;
+                bottom: 0;
+                z-index: 20;
+                padding: 0.75rem 1.25rem 1rem;
+            }
+            .toast { bottom: 160px; } /* keep it above the sticky footer buttons */
             .preview-panel {
                 padding: 1rem;
             }
@@ -358,7 +636,7 @@
                 padding: 0;
                 width: 210mm; /* Force A4 width */
             }
-            .controls-panel {
+            .controls-panel, #app-dialog, .toast {
                 display: none;
             }
             .preview-panel {
@@ -390,12 +668,10 @@
                 table-layout: auto;
             }
             .invoice-footer {
-                margin-top: auto; 
+                margin-top: auto;
                 position: relative;
                 padding-bottom: 0;
             }
-            /* Hide print button if somehow visible */
-            .print-btn { display: none; }
         }
     </style>
 </head>
@@ -404,93 +680,151 @@
     <div class="app-container">
         <!-- Controls Panel -->
         <div class="controls-panel">
-            <h2>Crear Factura</h2>
-            
-            <div class="form-section">
-                <h3>1. Datos de Factura</h3>
-                <div class="form-group">
-                    <label>Nº Factura</label>
-                    <input type="text" id="inv-num" value="F-2026/001" oninput="updateInvoice()">
+            <div class="controls-header">
+                <h2>Crear Factura</h2>
+                <button type="button" class="small-btn" id="btn-new">+ Nueva factura</button>
+            </div>
+
+            <div class="controls-body" id="controls-body">
+                <div class="draft-banner" id="draft-banner" hidden>
+                    <p id="draft-text"></p>
+                    <div class="draft-actions">
+                        <button type="button" class="small-btn primary" id="btn-draft-load">Cargar borrador</button>
+                        <button type="button" class="small-btn" id="btn-draft-discard">Descartar</button>
+                    </div>
                 </div>
-                <div class="grid-2">
+
+                <div class="form-section">
+                    <h3>1. Datos de Factura</h3>
                     <div class="form-group">
-                        <label>Fecha</label>
-                        <input type="date" id="inv-date" oninput="updateInvoice()">
+                        <label for="inv-num">Nº Factura</label>
+                        <input type="text" id="inv-num" placeholder="F-2026/001">
+                        <div class="hint" id="inv-num-hint"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="inv-date">Fecha</label>
+                            <input type="date" id="inv-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="inv-payment">Forma de Pago</label>
+                            <select id="inv-payment">
+                                <option value="CONTADO">Contado</option>
+                                <option value="TRANSFERENCIA BANCARIA">Transferencia</option>
+                                <option value="BIZUM">Bizum</option>
+                                <option value="DOMICILIACIÓN BANCARIA">Domiciliación</option>
+                                <option value="TARJETA">Tarjeta</option>
+                                <option value="__other">Otra…</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="payment-other-group" hidden>
+                        <label for="inv-payment-other">Otra forma de pago</label>
+                        <input type="text" id="inv-payment-other" placeholder="Ej: Pagaré a 30 días">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-head">
+                        <h3>2. Datos del Cliente</h3>
+                        <button type="button" class="link-btn" id="btn-clients" hidden>Clientes guardados</button>
                     </div>
                     <div class="form-group">
-                        <label>Forma de Pago</label>
-                        <input type="text" id="inv-payment" value="CONTADO" oninput="updateInvoice()">
+                        <label for="cli-name">Nombre / Razón Social</label>
+                        <input type="text" id="cli-name" list="clients-list" autocomplete="off" placeholder="Ej: Juan Pérez López">
+                        <datalist id="clients-list"></datalist>
+                        <div class="hint" id="cli-hint"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="cli-nif">NIF/CIF</label>
+                            <input type="text" id="cli-nif" placeholder="Ej: 12345678Z">
+                        </div>
+                        <div class="form-group">
+                            <label for="cli-num">Nº Cliente (Opc.)</label>
+                            <input type="text" id="cli-num">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cli-address">Dirección</label>
+                        <input type="text" id="cli-address" placeholder="Ej: Calle Mayor, 1">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="cli-cp">C.P.</label>
+                            <input type="text" id="cli-cp" inputmode="numeric" placeholder="32001">
+                        </div>
+                        <div class="form-group">
+                            <label for="cli-city">Población</label>
+                            <input type="text" id="cli-city" placeholder="Ourense">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cli-prov">Provincia</label>
+                        <input type="text" id="cli-prov" placeholder="Ourense">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>3. Conceptos</h3>
+                    <div id="concepts-container">
+                        <!-- Concept rows will be added here -->
+                    </div>
+                    <button type="button" class="add-row-btn" id="btn-add-concept">+ Añadir Concepto</button>
+                </div>
+
+                <div class="form-section">
+                    <h3>4. Impuestos</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="tax-iva">I.V.A. (%)</label>
+                            <input type="number" id="tax-iva" value="21" step="any">
+                            <div class="chips" data-target="tax-iva">
+                                <button type="button" class="chip" data-value="21">21</button>
+                                <button type="button" class="chip" data-value="10">10</button>
+                                <button type="button" class="chip" data-value="4">4</button>
+                                <button type="button" class="chip" data-value="0">0</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tax-irpf">Ret. IRPF (%)</label>
+                            <input type="number" id="tax-irpf" value="7" step="any">
+                            <div class="chips" data-target="tax-irpf">
+                                <button type="button" class="chip" data-value="15">15</button>
+                                <button type="button" class="chip" data-value="7">7</button>
+                                <button type="button" class="chip" data-value="0">0</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>5. Salida</h3>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label for="output-filename">Nombre del Archivo (PDF)</label>
+                        <input type="text" id="output-filename">
+                        <div class="hint">Se genera solo con el nº de factura y el cliente. Escribe aquí para cambiarlo.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="form-section">
-                <h3>2. Datos del Cliente</h3>
-                <div class="form-group">
-                    <label>Nombre / Razón Social</label>
-                    <input type="text" id="cli-name" value="Nombre del Cliente" oninput="updateInvoice()">
+            <div class="controls-footer">
+                <div class="footer-total">
+                    <span>Total factura</span>
+                    <strong id="footer-total">0,00 €</strong>
                 </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>NIF/CIF</label>
-                        <input type="text" id="cli-nif" value="B12345678" oninput="updateInvoice()">
-                    </div>
-                    <div class="form-group">
-                        <label>Nº Cliente (Opc.)</label>
-                        <input type="text" id="cli-num" oninput="updateInvoice()">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Dirección</label>
-                    <input type="text" id="cli-address" value="Calle Ejemplo, 1" oninput="updateInvoice()">
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>C.P.</label>
-                        <input type="text" id="cli-cp" value="32001" oninput="updateInvoice()">
-                    </div>
-                    <div class="form-group">
-                        <label>Población</label>
-                        <input type="text" id="cli-city" value="Ourense" oninput="updateInvoice()">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Provincia</label>
-                    <input type="text" id="cli-prov" value="Ourense" oninput="updateInvoice()">
+                <div class="footer-breakdown" id="footer-breakdown"></div>
+                <div class="footer-actions">
+                    <button type="button" class="action-btn print" id="btn-print">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        Imprimir / PDF
+                    </button>
+                    <button type="button" class="action-btn whatsapp" id="btn-whatsapp">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                        WhatsApp
+                    </button>
                 </div>
             </div>
-
-            <div class="form-section">
-                <h3>3. Conceptos</h3>
-                <div id="concepts-container">
-                    <!-- Concept rows will be added here -->
-                </div>
-                <button class="add-row-btn" onclick="addConceptRow()">+ Añadir Concepto</button>
-            </div>
-
-            <div class="form-section">
-                <h3>4. Impuestos</h3>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>I.V.A. (%)</label>
-                        <input type="number" id="tax-iva" value="21" oninput="updateInvoice()">
-                    </div>
-                    <div class="form-group">
-                        <label>Ret. IRPF (%)</label>
-                        <input type="number" id="tax-irpf" value="7" oninput="updateInvoice()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>5. Salida</h3>
-                <div class="form-group">
-                    <label>Nombre del Archivo (PDF)</label>
-                    <input type="text" id="output-filename" placeholder="Ej: Factura_Juan_Perez" oninput="updateDocumentTitle()">
-                </div>
-            </div>
-
-            <button class="btn-primary print-btn" onclick="window.print()">Imprimir / Guardar PDF</button>
         </div>
 
         <!-- Preview Panel -->
@@ -512,16 +846,16 @@
                 <div class="invoice-meta">
                     <div class="client-info">
                         <h4>DATOS DEL CLIENTE</h4>
-                        <p><strong id="out-cli-name">Nombre del Cliente</strong></p>
-                        <p>NIF/CIF: <span id="out-cli-nif">B12345678</span></p>
-                        <p id="out-cli-address">Calle Ejemplo, 1</p>
-                        <p><span id="out-cli-cp">32001</span> - <span id="out-cli-city">Ourense</span> (<span id="out-cli-prov">Ourense</span>)</p>
+                        <p><strong id="out-cli-name"></strong></p>
+                        <p>NIF/CIF: <span id="out-cli-nif"></span></p>
+                        <p id="out-cli-address"></p>
+                        <p id="out-cli-location"></p>
                     </div>
                     <div class="invoice-details">
                         <h2>FACTURA</h2>
                         <div class="info-row">
                             <span class="info-label">Nº Factura:</span>
-                            <span class="info-value" id="out-inv-num">F-2026/001</span>
+                            <span class="info-value" id="out-inv-num"></span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Fecha:</span>
@@ -533,7 +867,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-label">Forma de Pago:</span>
-                            <span class="info-value" id="out-inv-payment">CONTADO</span>
+                            <span class="info-value" id="out-inv-payment"></span>
                         </div>
                     </div>
                 </div>
@@ -590,152 +924,751 @@
         </div>
     </div>
 
-    <script>
-        let concepts = [
-            { ref: '', name: 'Comisiones de venta', qty: 1, price: 1200, dto: 0 }
-        ];
+    <dialog id="app-dialog">
+        <div class="dlg-title"></div>
+        <div class="dlg-body"></div>
+        <div class="dlg-actions"></div>
+    </dialog>
 
-        function init() {
-            document.getElementById('inv-date').valueAsDate = new Date();
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        // ---------- Storage ----------
+        const STORAGE = {
+            draft: 'vibo_invoice_draft',
+            lastNum: 'vibo_last_invoice_num',
+            clients: 'vibo_clients'
+        };
+
+        function lsGet(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function lsSet(key, value) {
+            try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ }
+        }
+
+        function lsRemove(key) {
+            try { localStorage.removeItem(key); } catch (e) { /* storage unavailable */ }
+        }
+
+        // ---------- State ----------
+        const $ = id => document.getElementById(id);
+        const CLIENT_FIELDS = { name: 'cli-name', nif: 'cli-nif', num: 'cli-num', address: 'cli-address', cp: 'cli-cp', city: 'cli-city', prov: 'cli-prov' };
+        const PAYMENT_OPTIONS = Array.from($('inv-payment').options).map(o => o.value).filter(v => v !== '__other');
+
+        let concepts = [];
+        let issued = false;        // current invoice already printed / sent
+        let draftPending = false;  // a saved draft is offered and not yet loaded or discarded
+        let saveTimer = null;
+
+        function emptyConcept() {
+            return { ref: '', name: '', qty: 1, price: 0, dto: 0 };
+        }
+
+        function todayISO() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function getPayment() {
+            const sel = $('inv-payment').value;
+            return sel === '__other' ? $('inv-payment-other').value.trim() : sel;
+        }
+
+        function setPayment(value) {
+            if (!value || PAYMENT_OPTIONS.includes(value)) {
+                $('inv-payment').value = value || 'CONTADO';
+                $('inv-payment-other').value = '';
+            } else {
+                $('inv-payment').value = '__other';
+                $('inv-payment-other').value = value;
+            }
+            $('payment-other-group').hidden = $('inv-payment').value !== '__other';
+        }
+
+        function getClient() {
+            const client = {};
+            for (const [key, id] of Object.entries(CLIENT_FIELDS)) client[key] = $(id).value.trim();
+            return client;
+        }
+
+        function setClient(client) {
+            for (const [key, id] of Object.entries(CLIENT_FIELDS)) $(id).value = (client && client[key]) || '';
+        }
+
+        function getState() {
+            return {
+                invNum: $('inv-num').value.trim(),
+                invDate: $('inv-date').value,
+                payment: getPayment(),
+                client: getClient(),
+                concepts: concepts.map(c => ({ ...c })),
+                iva: $('tax-iva').value,
+                irpf: $('tax-irpf').value,
+                filename: $('output-filename').value
+            };
+        }
+
+        function setState(s) {
+            $('inv-num').value = s.invNum || '';
+            $('inv-date').value = s.invDate || todayISO();
+            setPayment(s.payment);
+            setClient(s.client);
+            concepts = (s.concepts || []).map(c => ({ ...emptyConcept(), ...c }));
+            $('tax-iva').value = s.iva ?? 21;
+            $('tax-irpf').value = s.irpf ?? 7;
+            $('output-filename').value = s.filename || '';
             renderConceptsForm();
             updateInvoice();
         }
 
-        function renderConceptsForm() {
-            const container = document.getElementById('concepts-container');
-            container.innerHTML = '';
-            
+        function blankState() {
+            return {
+                invNum: nextInvoiceNumber(lsGet(STORAGE.lastNum, '')),
+                invDate: todayISO(),
+                payment: getPayment() || 'CONTADO',
+                client: {},
+                concepts: [emptyConcept()],
+                iva: $('tax-iva').value || 21,
+                irpf: $('tax-irpf').value || 7,
+                filename: ''
+            };
+        }
+
+        function hasContent(s) {
+            return Boolean(s.client && s.client.name) ||
+                (s.concepts || []).some(c => c.name || c.price);
+        }
+
+        // ---------- Numbering ----------
+        function nextInvoiceNumber(last) {
+            const year = new Date().getFullYear();
+            if (!last) return `F-${year}/001`;
+
+            // "F-2025/014" in a new year -> "F-2026/001"
+            const withYear = last.match(/^(\D*)(\d{4})(\D+)(\d+)$/);
+            if (withYear && Number(withYear[2]) !== year) {
+                return `${withYear[1]}${year}${withYear[3]}${'1'.padStart(withYear[4].length, '0')}`;
+            }
+
+            const m = last.match(/^(.*?)(\d+)(\D*)$/);
+            if (!m) return last;
+            return m[1] + String(Number(m[2]) + 1).padStart(m[2].length, '0') + m[3];
+        }
+
+        function updateNumberHint() {
+            const last = lsGet(STORAGE.lastNum, '');
+            $('inv-num-hint').textContent = last ? `Última factura emitida: ${last}` : '';
+        }
+
+        // ---------- Clients ----------
+        function getClients() {
+            return lsGet(STORAGE.clients, []);
+        }
+
+        function clientKey(c) {
+            return (c.nif || c.name).toUpperCase().replace(/\s+/g, '');
+        }
+
+        function saveClient(client) {
+            if (!client.name) return;
+            const key = clientKey(client);
+            const name = client.name.toLowerCase();
+            // Same NIF or same name -> update that client instead of adding a duplicate
+            const clients = getClients().filter(c => clientKey(c) !== key && c.name.toLowerCase() !== name);
+            clients.unshift({ ...client, updatedAt: Date.now() });
+            lsSet(STORAGE.clients, clients);
+            renderClientsList();
+        }
+
+        function deleteClient(key) {
+            lsSet(STORAGE.clients, getClients().filter(c => clientKey(c) !== key));
+            renderClientsList();
+        }
+
+        function renderClientsList() {
+            const clients = getClients();
+            const list = $('clients-list');
+            list.replaceChildren(...clients.map(c => {
+                const opt = document.createElement('option');
+                opt.value = c.name;
+                if (c.nif) opt.label = c.nif;
+                return opt;
+            }));
+            $('btn-clients').hidden = clients.length === 0;
+            $('cli-hint').textContent = clients.length
+                ? `${clients.length} cliente${clients.length === 1 ? '' : 's'} guardado${clients.length === 1 ? '' : 's'}: empieza a escribir para elegirlo.`
+                : 'Los clientes se guardan solos al imprimir o enviar la factura.';
+        }
+
+        function fillClientFromName(name) {
+            const match = getClients().find(c => c.name.toLowerCase() === name.trim().toLowerCase());
+            if (!match) return false;
+            setClient(match);
+            toast(`Datos de ${match.name} cargados`);
+            return true;
+        }
+
+        function openClientsDialog() {
+            const ul = document.createElement('ul');
+            ul.className = 'client-list';
+
+            const renderRows = () => {
+                const clients = getClients();
+                if (!clients.length) {
+                    ul.replaceChildren(Object.assign(document.createElement('li'), { textContent: 'No hay clientes guardados.' }));
+                    return;
+                }
+                ul.replaceChildren(...clients.map(c => {
+                    const li = document.createElement('li');
+                    const info = document.createElement('div');
+                    info.append(Object.assign(document.createElement('strong'), { textContent: c.name }));
+                    info.append(Object.assign(document.createElement('small'), { textContent: [c.nif, c.city].filter(Boolean).join(' · ') }));
+
+                    const btns = document.createElement('div');
+                    btns.className = 'row-btns';
+                    const use = Object.assign(document.createElement('button'), { type: 'button', className: 'small-btn primary', textContent: 'Usar' });
+                    use.onclick = () => {
+                        setClient(c);
+                        onDataChanged();
+                        closeDialog();
+                        toast(`Datos de ${c.name} cargados`);
+                    };
+                    const del = Object.assign(document.createElement('button'), { type: 'button', className: 'small-btn danger', textContent: 'Borrar' });
+                    del.onclick = () => { deleteClient(clientKey(c)); renderRows(); };
+                    btns.append(use, del);
+
+                    li.append(info, btns);
+                    return li;
+                }));
+            };
+
+            renderRows();
+            showDialog({ title: 'Clientes guardados', body: ul, buttons: [{ label: 'Cerrar' }] });
+        }
+
+        // ---------- Concepts form ----------
+        function renderConceptsForm(focusIndex) {
+            const container = $('concepts-container');
+            container.replaceChildren();
+
             concepts.forEach((c, i) => {
-                const div = document.createElement('div');
-                div.className = 'concept-row';
-                div.innerHTML = `
-                    <button class="remove-row" onclick="removeConcept(${i})" title="Eliminar">✕</button>
-                    <div class="form-group" style="margin-bottom:0.5rem">
-                        <label>Concepto</label>
-                        <input type="text" placeholder="Ej: Comisiones..." value="${c.name}" oninput="updateConcept(${i}, 'name', this.value)">
+                const row = document.createElement('div');
+                row.className = 'concept-row';
+                row.innerHTML = `
+                    <div class="concept-head">
+                        <span class="concept-label">Concepto ${i + 1}</span>
+                        <div class="concept-actions">
+                            <button type="button" class="icon-btn" data-act="dup" title="Duplicar concepto" aria-label="Duplicar concepto">⧉</button>
+                            <button type="button" class="icon-btn danger" data-act="del" title="Eliminar concepto" aria-label="Eliminar concepto">✕</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" data-f="name" placeholder="Ej: Comisiones de venta">
                     </div>
                     <div class="grid-2">
-                        <div class="form-group" style="margin-bottom:0">
+                        <div class="form-group">
                             <label>Ref.</label>
-                            <input type="text" placeholder="Referencia" value="${c.ref}" oninput="updateConcept(${i}, 'ref', this.value)">
+                            <input type="text" data-f="ref" placeholder="Referencia">
                         </div>
-                        <div class="form-group" style="margin-bottom:0">
+                        <div class="form-group">
                             <label>Cantidad</label>
-                            <input type="number" step="0.01" value="${c.qty}" oninput="updateConcept(${i}, 'qty', this.value)">
+                            <input type="number" data-f="qty" step="any" inputmode="decimal">
                         </div>
                     </div>
-                    <div class="grid-2" style="margin-top:0.5rem">
-                        <div class="form-group" style="margin-bottom:0">
+                    <div class="grid-2">
+                        <div class="form-group">
                             <label>Precio (€)</label>
-                            <input type="number" step="0.01" value="${c.price}" oninput="updateConcept(${i}, 'price', this.value)">
+                            <input type="number" data-f="price" step="any" inputmode="decimal" placeholder="0,00">
                         </div>
-                        <div class="form-group" style="margin-bottom:0">
+                        <div class="form-group">
                             <label>Dto. (%)</label>
-                            <input type="number" step="0.01" value="${c.dto}" oninput="updateConcept(${i}, 'dto', this.value)">
+                            <input type="number" data-f="dto" step="any" inputmode="decimal" placeholder="0">
                         </div>
                     </div>
                 `;
-                container.appendChild(div);
+
+                row.querySelectorAll('[data-f]').forEach(input => {
+                    const field = input.dataset.f;
+                    const value = c[field];
+                    input.value = (field === 'price' || field === 'dto') && value === 0 ? '' : value;
+                    input.addEventListener('input', () => updateConcept(i, field, input.value));
+                });
+                row.querySelector('[data-act="dup"]').onclick = () => duplicateConcept(i);
+                row.querySelector('[data-act="del"]').onclick = () => removeConcept(i);
+
+                container.appendChild(row);
             });
+
+            if (focusIndex !== undefined && container.children[focusIndex]) {
+                container.children[focusIndex].querySelector('[data-f="name"]').focus();
+            }
         }
 
         function addConceptRow() {
-            concepts.push({ ref: '', name: '', qty: 1, price: 0, dto: 0 });
-            renderConceptsForm();
-            updateInvoice();
+            concepts.push(emptyConcept());
+            renderConceptsForm(concepts.length - 1);
+            onDataChanged();
+        }
+
+        function duplicateConcept(index) {
+            concepts.splice(index + 1, 0, { ...concepts[index] });
+            renderConceptsForm(index + 1);
+            onDataChanged();
         }
 
         function removeConcept(index) {
             concepts.splice(index, 1);
             renderConceptsForm();
-            updateInvoice();
+            onDataChanged();
         }
 
         function updateConcept(index, field, value) {
             concepts[index][field] = field === 'name' || field === 'ref' ? value : parseFloat(value) || 0;
-            updateInvoice();
         }
 
+        // ---------- Formatting & totals ----------
         function formatCurrency(val) {
             return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val);
         }
 
         function formatDate(dateStr) {
             if (!dateStr) return '';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('es-ES');
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
         }
 
-        function updateInvoice() {
-            // Update Text Fields
-            document.getElementById('out-inv-num').innerText = document.getElementById('inv-num').value;
-            document.getElementById('out-inv-date').innerText = formatDate(document.getElementById('inv-date').value);
-            
-            const clientNum = document.getElementById('cli-num').value;
-            document.getElementById('out-cli-num').innerText = clientNum ? clientNum : '-';
-            
-            document.getElementById('out-inv-payment').innerText = document.getElementById('inv-payment').value;
-            
-            document.getElementById('out-cli-name').innerText = document.getElementById('cli-name').value || '-';
-            document.getElementById('out-cli-nif').innerText = document.getElementById('cli-nif').value || '-';
-            document.getElementById('out-cli-address').innerText = document.getElementById('cli-address').value || '-';
-            document.getElementById('out-cli-cp').innerText = document.getElementById('cli-cp').value || '-';
-            document.getElementById('out-cli-city').innerText = document.getElementById('cli-city').value || '-';
-            document.getElementById('out-cli-prov').innerText = document.getElementById('cli-prov').value || '-';
-
-            // Taxes
-            const ivaPerc = parseFloat(document.getElementById('tax-iva').value) || 0;
-            const irpfPerc = parseFloat(document.getElementById('tax-irpf').value) || 0;
-            document.getElementById('out-iva-perc').innerText = ivaPerc;
-            document.getElementById('out-irpf-perc').innerText = irpfPerc;
-
-            // Concepts & Math
+        function computeTotals(conceptList, ivaPerc, irpfPerc) {
             let subtotal = 0;
-            let totalDiscount = 0;
-            
-            const tbody = document.getElementById('out-concepts');
-            tbody.innerHTML = '';
-
-            concepts.forEach(c => {
-                const rowBase = c.qty * c.price;
-                const rowDto = rowBase * (c.dto / 100);
-                const rowTotal = rowBase - rowDto;
-                
+            let discount = 0;
+            conceptList.forEach(c => {
+                const rowBase = (Number(c.qty) || 0) * (Number(c.price) || 0);
                 subtotal += rowBase;
-                totalDiscount += rowDto;
+                discount += rowBase * ((Number(c.dto) || 0) / 100);
+            });
+            const base = subtotal - discount;
+            const iva = base * ((parseFloat(ivaPerc) || 0) / 100);
+            const irpf = base * ((parseFloat(irpfPerc) || 0) / 100);
+            return { subtotal, discount, base, iva, irpf, total: base + iva - irpf };
+        }
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${c.ref}</td>
-                        <td>${c.name}</td>
-                        <td>${c.qty}</td>
-                        <td>${formatCurrency(c.price)}</td>
-                        <td>${c.dto}%</td>
-                        <td>${formatCurrency(rowTotal)}</td>
-                    </tr>
-                `;
+        function autoFilename() {
+            const num = $('inv-num').value.trim().replace(/[\/\\]/g, '-');
+            const client = $('cli-name').value.trim();
+            return ['Factura', num, client].filter(Boolean).join('_')
+                .replace(/[:*?"<>|\/\\]/g, '')
+                .replace(/\s+/g, '_');
+        }
+
+        function currentFilename() {
+            return $('output-filename').value.trim() || autoFilename();
+        }
+
+        // ---------- Preview ----------
+        function updateInvoice() {
+            const s = getState();
+            const client = s.client;
+
+            $('out-inv-num').innerText = s.invNum;
+            $('out-inv-date').innerText = formatDate(s.invDate);
+            $('out-cli-num').innerText = client.num || '-';
+            $('out-inv-payment').innerText = s.payment;
+
+            $('out-cli-name').innerText = client.name;
+            $('out-cli-nif').innerText = client.nif;
+            $('out-cli-address').innerText = client.address;
+            $('out-cli-location').innerText = [
+                [client.cp, client.city].filter(Boolean).join(' - '),
+                client.prov ? `(${client.prov})` : ''
+            ].filter(Boolean).join(' ');
+
+            const ivaPerc = parseFloat(s.iva) || 0;
+            const irpfPerc = parseFloat(s.irpf) || 0;
+            $('out-iva-perc').innerText = ivaPerc;
+            $('out-irpf-perc').innerText = irpfPerc;
+
+            const tbody = $('out-concepts');
+            tbody.replaceChildren(...concepts.map(c => {
+                const rowBase = c.qty * c.price;
+                const rowTotal = rowBase - rowBase * (c.dto / 100);
+                const tr = document.createElement('tr');
+                [c.ref, c.name, c.qty, formatCurrency(c.price), `${c.dto}%`, formatCurrency(rowTotal)].forEach(text => {
+                    const td = document.createElement('td');
+                    td.textContent = text;
+                    tr.appendChild(td);
+                });
+                return tr;
+            }));
+
+            const t = computeTotals(concepts, ivaPerc, irpfPerc);
+            $('out-subtotal').innerText = formatCurrency(t.subtotal);
+            $('out-discount').innerText = formatCurrency(t.discount);
+            $('out-base').innerText = formatCurrency(t.base);
+            $('out-iva-val').innerText = formatCurrency(t.iva);
+            $('out-irpf-val').innerText = formatCurrency(t.irpf);
+            $('out-total').innerText = formatCurrency(t.total);
+
+            $('footer-total').innerText = formatCurrency(t.total);
+            $('footer-breakdown').innerText =
+                `Base ${formatCurrency(t.base)} + IVA ${formatCurrency(t.iva)} − IRPF ${formatCurrency(t.irpf)}`;
+
+            document.querySelectorAll('.chips').forEach(group => {
+                const value = parseFloat($(group.dataset.target).value);
+                group.querySelectorAll('.chip').forEach(chip => {
+                    chip.classList.toggle('active', parseFloat(chip.dataset.value) === value);
+                });
             });
 
-            const baseImponible = subtotal - totalDiscount;
-            const ivaVal = baseImponible * (ivaPerc / 100);
-            const irpfVal = baseImponible * (irpfPerc / 100);
-            const total = baseImponible + ivaVal - irpfVal;
-
-            document.getElementById('out-subtotal').innerText = formatCurrency(subtotal);
-            document.getElementById('out-discount').innerText = formatCurrency(totalDiscount);
-            document.getElementById('out-base').innerText = formatCurrency(baseImponible);
-            document.getElementById('out-iva-val').innerText = formatCurrency(ivaVal);
-            document.getElementById('out-irpf-val').innerText = formatCurrency(irpfVal);
-            document.getElementById('out-total').innerText = formatCurrency(total);
+            $('output-filename').placeholder = autoFilename();
+            document.title = currentFilename();
         }
 
-        function updateDocumentTitle() {
-            const filename = document.getElementById('output-filename').value;
-            if (filename) {
-                document.title = filename;
-            } else {
-                document.title = "Generador de Facturas | VIBOASESOR";
+        // ---------- Draft ----------
+        function onDataChanged() {
+            issued = false;
+            updateInvoice();
+            scheduleSave();
+        }
+
+        function scheduleSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveDraft, 400);
+        }
+
+        function saveDraft() {
+            if (draftPending) return; // don't overwrite the offered draft until the user decides
+            lsSet(STORAGE.draft, { ...getState(), issued, savedAt: Date.now() });
+        }
+
+        function offerDraft() {
+            const draft = lsGet(STORAGE.draft, null);
+            if (!draft || !hasContent(draft)) return;
+
+            const saved = new Date(draft.savedAt);
+            const when = `${saved.toLocaleDateString('es-ES')} a las ${saved.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+            const total = computeTotals(draft.concepts || [], draft.iva, draft.irpf).total;
+            const who = (draft.client && draft.client.name) || 'sin cliente';
+
+            $('draft-text').textContent =
+                `📝 Tienes un borrador del ${when}: ${draft.invNum || 'sin número'} · ${who} · ${formatCurrency(total)}` +
+                (draft.issued ? ' (ya impreso o enviado).' : '.');
+            $('draft-banner').hidden = false;
+            draftPending = true;
+        }
+
+        function loadDraft() {
+            const draft = lsGet(STORAGE.draft, null);
+            draftPending = false;
+            $('draft-banner').hidden = true;
+            if (!draft) return;
+            setState(draft);
+            issued = Boolean(draft.issued);
+            toast('Borrador cargado');
+        }
+
+        function discardDraft() {
+            draftPending = false;
+            $('draft-banner').hidden = true;
+            lsRemove(STORAGE.draft);
+            saveDraft();
+        }
+
+        async function newInvoice() {
+            if (!issued && hasContent(getState())) {
+                const ok = await showDialog({
+                    title: '¿Empezar una factura nueva?',
+                    body: 'La factura actual no se ha impreso ni enviado. Si continúas, se perderán sus datos.',
+                    buttons: [{ label: 'Cancelar' }, { label: 'Nueva factura', value: true, primary: true }]
+                });
+                if (!ok) return;
             }
+            draftPending = false;
+            $('draft-banner').hidden = true;
+            setState(blankState());
+            issued = false;
+            saveDraft();
+            $('cli-name').focus();
+            toast(`Nueva factura ${$('inv-num').value}`);
+        }
+
+        // ---------- Validation ----------
+        function isValidNif(value) {
+            const v = value.toUpperCase().replace(/[\s-]/g, '');
+            const letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
+            if (/^\d{8}[A-Z]$/.test(v)) return letters[Number(v.slice(0, 8)) % 23] === v[8];
+            if (/^[XYZ]\d{7}[A-Z]$/.test(v)) {
+                const num = 'XYZ'.indexOf(v[0]) + v.slice(1, 8);
+                return letters[Number(num) % 23] === v[8];
+            }
+            return /^[ABCDEFGHJKLMNPQRSUVW]\d{7}[0-9A-J]$/.test(v);
+        }
+
+        function getWarnings() {
+            const s = getState();
+            const c = s.client;
+            const warnings = [];
+            const lastNum = lsGet(STORAGE.lastNum, '');
+
+            if (!s.invNum) warnings.push('Falta el número de factura.');
+            else if (s.invNum === lastNum && !issued) warnings.push(`El número ${s.invNum} ya se usó en la última factura emitida.`);
+            if (!s.invDate) warnings.push('Falta la fecha.');
+            if (!s.payment) warnings.push('Falta la forma de pago.');
+            if (!c.name) warnings.push('Falta el nombre del cliente.');
+            if (!c.nif) warnings.push('Falta el NIF/CIF del cliente.');
+            else if (!isValidNif(c.nif)) warnings.push(`El NIF/CIF «${c.nif}» no parece válido.`);
+            if (!c.address || !c.cp || !c.city) warnings.push('La dirección del cliente está incompleta.');
+
+            if (!concepts.length) {
+                warnings.push('No hay ningún concepto.');
+            } else {
+                const unnamed = concepts.filter(x => !x.name.trim()).length;
+                const noPrice = concepts.filter(x => !x.price).length;
+                if (unnamed) warnings.push(`Hay ${unnamed} concepto${unnamed > 1 ? 's' : ''} sin descripción.`);
+                if (noPrice) warnings.push(`Hay ${noPrice} concepto${noPrice > 1 ? 's' : ''} con precio 0 €.`);
+            }
+
+            const total = computeTotals(concepts, s.iva, s.irpf).total;
+            if (concepts.length && total <= 0) warnings.push('El total de la factura es 0 € o negativo.');
+            return warnings;
+        }
+
+        async function confirmIssue() {
+            const warnings = getWarnings();
+            if (!warnings.length) return true;
+
+            const body = document.createElement('div');
+            body.append(Object.assign(document.createElement('p'), { textContent: 'Antes de continuar, revisa esto:' }));
+            const ul = document.createElement('ul');
+            warnings.forEach(w => ul.append(Object.assign(document.createElement('li'), { textContent: w })));
+            body.append(ul);
+
+            return Boolean(await showDialog({
+                title: 'Revisa la factura',
+                body,
+                buttons: [{ label: 'Continuar igualmente', value: true }, { label: 'Volver y corregir', primary: true }]
+            }));
+        }
+
+        function markIssued() {
+            const s = getState();
+            if (s.invNum) lsSet(STORAGE.lastNum, s.invNum);
+            saveClient(s.client);
+            issued = true;
+            draftPending = false;
+            $('draft-banner').hidden = true;
+            saveDraft();
+            updateNumberHint();
+        }
+
+        // ---------- Print ----------
+        async function printInvoice() {
+            if (!await confirmIssue()) return;
+            markIssued();
+            document.title = currentFilename();
+            window.print();
+        }
+
+        // ---------- WhatsApp ----------
+        function shareMessage() {
+            const s = getState();
+            const total = formatCurrency(computeTotals(concepts, s.iva, s.irpf).total);
+            const greeting = s.client.name ? `Hola ${s.client.name},` : 'Hola,';
+            return `${greeting} te envío la factura ${s.invNum} por importe de ${total}.\nUn saludo,\nSonia Fidalgo – VIBOASESOR`;
+        }
+
+        async function buildPdfBlob() {
+            if (typeof html2pdf === 'undefined') throw new Error('html2pdf no disponible');
+            const clone = $('invoice').cloneNode(true);
+            clone.removeAttribute('id');
+            clone.classList.add('pdf-export');
+
+            return html2pdf()
+                .set({
+                    margin: 0,
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                })
+                .from(clone)
+                .outputPdf('blob');
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
+        }
+
+        async function sendWhatsApp() {
+            if (!await confirmIssue()) return;
+
+            const btn = $('btn-whatsapp');
+            const label = btn.lastChild.textContent;
+            btn.disabled = true;
+            btn.lastChild.textContent = ' Generando PDF…';
+
+            let blob;
+            try {
+                blob = await buildPdfBlob();
+            } catch (e) {
+                console.error(e);
+                showDialog({
+                    title: 'No se pudo generar el PDF',
+                    body: 'Comprueba la conexión a internet y vuelve a intentarlo. Mientras tanto, puedes usar «Imprimir / PDF» y enviarlo a mano.',
+                    buttons: [{ label: 'Entendido', primary: true }]
+                });
+                return;
+            } finally {
+                btn.disabled = false;
+                btn.lastChild.textContent = label;
+            }
+
+            markIssued();
+            const filename = `${currentFilename()}.pdf`;
+            const file = new File([blob], filename, { type: 'application/pdf' });
+            const text = shareMessage();
+
+            // Mobile (and Safari on Mac): native share sheet with the PDF attached
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                const share = () => navigator.share({ files: [file], text });
+                try {
+                    await share();
+                } catch (e) {
+                    if (e.name === 'NotAllowedError') {
+                        // PDF generation took too long and the browser needs a fresh tap
+                        const go = await showDialog({
+                            title: 'Factura lista',
+                            body: 'Pulsa «Compartir», elige WhatsApp y después el contacto.',
+                            buttons: [{ label: 'Cancelar' }, { label: 'Compartir', value: true, primary: true }]
+                        });
+                        if (go) share().catch(err => { if (err.name !== 'AbortError') console.error(err); });
+                    } else if (e.name !== 'AbortError') {
+                        console.error(e);
+                    }
+                }
+                return;
+            }
+
+            // Desktop fallback: download the PDF and open WhatsApp with the message ready
+            downloadBlob(blob, filename);
+            const body = document.createElement('div');
+            body.append(
+                Object.assign(document.createElement('p'), { textContent: `Se ha descargado «${filename}».` }),
+                Object.assign(document.createElement('p'), { textContent: 'Al abrir WhatsApp, elige el contacto y adjunta el archivo con el clip 📎. El mensaje ya va escrito.' })
+            );
+            const open = await showDialog({
+                title: 'Enviar por WhatsApp',
+                body,
+                buttons: [{ label: 'Cerrar' }, { label: 'Abrir WhatsApp', value: true, primary: true }]
+            });
+            if (open) window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+        }
+
+        // ---------- Dialog & toast ----------
+        let dialogResolve = null;
+
+        function showDialog({ title, body, buttons }) {
+            const dlg = $('app-dialog');
+            if (dlg.open) closeDialog();
+
+            dlg.querySelector('.dlg-title').textContent = title;
+            const bodyEl = dlg.querySelector('.dlg-body');
+            bodyEl.replaceChildren(typeof body === 'string'
+                ? Object.assign(document.createElement('p'), { textContent: body })
+                : body);
+
+            const actions = dlg.querySelector('.dlg-actions');
+            actions.replaceChildren(...buttons.map(b => {
+                const btn = Object.assign(document.createElement('button'), {
+                    type: 'button',
+                    className: b.primary ? 'small-btn primary' : 'small-btn',
+                    textContent: b.label
+                });
+                btn.onclick = () => closeDialog(b.value);
+                return btn;
+            }));
+
+            return new Promise(resolve => {
+                dialogResolve = resolve;
+                dlg.showModal();
+                const primary = actions.querySelector('.primary');
+                if (primary) primary.focus();
+            });
+        }
+
+        function closeDialog(value) {
+            const resolve = dialogResolve;
+            dialogResolve = null;
+            const dlg = $('app-dialog');
+            if (dlg.open) dlg.close();
+            if (resolve) resolve(value);
+        }
+
+        let toastTimer = null;
+        function toast(message) {
+            const el = $('toast');
+            el.textContent = message;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+        }
+
+        // ---------- Init ----------
+        function init() {
+            // Any edit in the form refreshes the preview and autosaves the draft
+            $('controls-body').addEventListener('input', e => {
+                if (e.target.id === 'inv-payment') {
+                    $('payment-other-group').hidden = e.target.value !== '__other';
+                    if (e.target.value === '__other') $('inv-payment-other').focus();
+                }
+                if (e.target.id === 'cli-name' && (!e.inputType || e.inputType === 'insertReplacementText')) {
+                    fillClientFromName(e.target.value);
+                }
+                onDataChanged();
+            });
+
+            document.querySelectorAll('.chips').forEach(group => {
+                group.addEventListener('click', e => {
+                    const chip = e.target.closest('.chip');
+                    if (!chip) return;
+                    const input = $(group.dataset.target);
+                    input.value = chip.dataset.value;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+            });
+
+            // Avoid changing amounts by accident when scrolling over a focused number field
+            document.addEventListener('wheel', e => {
+                if (e.target instanceof HTMLInputElement && e.target.type === 'number' && document.activeElement === e.target) {
+                    e.target.blur();
+                }
+            }, { passive: true });
+
+            $('app-dialog').addEventListener('close', () => closeDialog());
+
+            $('btn-add-concept').onclick = addConceptRow;
+            $('btn-new').onclick = newInvoice;
+            $('btn-print').onclick = printInvoice;
+            $('btn-whatsapp').onclick = sendWhatsApp;
+            $('btn-clients').onclick = openClientsDialog;
+            $('btn-draft-load').onclick = loadDraft;
+            $('btn-draft-discard').onclick = discardDraft;
+
+            renderClientsList();
+            updateNumberHint();
+            setState(blankState());
+            offerDraft();
+            if (!draftPending) saveDraft();
         }
 
         // Initialize
