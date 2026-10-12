@@ -365,9 +365,11 @@
             margin-bottom: 1.5rem;
         }
 
+        /* Lines instead of a dark filled header, to save printer ink */
         .invoice-table th {
-            background: var(--primary);
-            color: white;
+            color: var(--primary);
+            border-top: 2px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
             padding: 1rem;
             text-align: left;
             font-size: 0.9rem;
@@ -697,12 +699,6 @@
             }
 
             /* Ink saver: no filled backgrounds on paper, only thin lines */
-            .invoice-table th {
-                background: none;
-                color: var(--primary);
-                border-top: 2px solid var(--primary);
-                border-bottom: 2px solid var(--primary);
-            }
             .client-info,
             .invoice-summary {
                 background: none;
