@@ -695,6 +695,22 @@
                 position: relative;
                 padding-bottom: 0;
             }
+
+            /* Ink saver: no filled backgrounds on paper, only thin lines */
+            .invoice-table th {
+                background: none;
+                color: var(--primary);
+                border-top: 2px solid var(--primary);
+                border-bottom: 2px solid var(--primary);
+            }
+            .client-info,
+            .invoice-summary {
+                background: none;
+                border: 1px solid #CBD5E1;
+            }
+            .client-info {
+                border-left: 3px solid var(--accent);
+            }
         }
     </style>
 </head>
